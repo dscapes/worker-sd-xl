@@ -7,3 +7,4 @@ invisible_watermark
 transformers
 accelerate
 safetensors
+huggingface-hub

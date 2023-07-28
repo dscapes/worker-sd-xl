@@ -15,6 +15,10 @@ from diffusers import StableDiffusionPipeline
 from diffusers.pipelines.stable_diffusion.safety_checker import (
     StableDiffusionSafetyChecker,
 )
+from huggingface_hub._login import _login
+
+token = os.getenv("HUGGINGFACE_TOKEN")
+_login(token=token, add_to_git_credential=False)
 
 SAFETY_MODEL_ID = "CompVis/stable-diffusion-safety-checker"
 MODEL_CACHE_DIR = "diffusers-cache"
@@ -24,12 +28,6 @@ def download_model(model_url: str = "https://huggingface.co/stabilityai/stable-d
     Downloads the model from the URL passed in.
     '''
     # read the environment variable
-    token = os.getenv("HUGGINGFACE_TOKEN")
-
-    # if the token exists, set it as an environment variable
-    if token is not None:
-        os.environ["HUGGINGFACE_TOKEN"] = token
-
     model_cache_path = Path(MODEL_CACHE_DIR)
     if model_cache_path.exists():
         shutil.rmtree(model_cache_path)
@@ -49,13 +47,11 @@ def download_model(model_url: str = "https://huggingface.co/stabilityai/stable-d
     StableDiffusionSafetyChecker.from_pretrained(
         SAFETY_MODEL_ID,
         cache_dir=model_cache_path,
-        token=token,
     )
 
     StableDiffusionPipeline.from_pretrained(
         model_id,
         cache_dir=model_cache_path,
-        token=token,
     )
 
 # ---------------------------------------------------------------------------- #
