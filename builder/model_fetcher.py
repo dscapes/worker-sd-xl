@@ -11,7 +11,6 @@ import argparse
 from pathlib import Path
 from urllib.parse import urlparse
 
-from huggingface_hub import HfApi
 from diffusers import StableDiffusionPipeline
 from diffusers.pipelines.stable_diffusion.safety_checker import (
     StableDiffusionSafetyChecker,
@@ -27,10 +26,11 @@ def download_model(model_url: str = "https://huggingface.co/stabilityai/stable-d
     Downloads the model from the URL passed in.
     '''
     # read the environment variable
-    token = os.environ.get("HUGGINGFACE_TOKEN")
+    token = os.getenv("HUGGINGFACE_TOKEN")
 
-    # use the token to authenticate
-    HfApi().login(token)
+    # if the token exists, set it as an environment variable
+    if token is not None:
+        os.environ["HUGGINGFACE_TOKEN"] = token
 
     model_cache_path = Path(MODEL_CACHE_DIR)
     if model_cache_path.exists():
