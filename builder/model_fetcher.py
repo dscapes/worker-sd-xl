@@ -19,7 +19,7 @@ SAFETY_MODEL_ID = "CompVis/stable-diffusion-safety-checker"
 MODEL_CACHE_DIR = "diffusers-cache"
 
 
-def download_model(model_url: str):
+def download_model(model_url: str = "https://huggingface.co/stabilityai/stable-diffusion-xl-base-0.9"):
     '''
     Downloads the model from the URL passed in.
     '''
