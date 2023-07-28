@@ -19,8 +19,6 @@ from diffusers.pipelines.stable_diffusion.safety_checker import (
 SAFETY_MODEL_ID = "CompVis/stable-diffusion-safety-checker"
 MODEL_CACHE_DIR = "diffusers-cache"
 
-access_token = "hf_..."
-
 def download_model(model_url: str = "https://huggingface.co/stabilityai/stable-diffusion-xl-base-0.9"):
     '''
     Downloads the model from the URL passed in.
@@ -51,11 +49,13 @@ def download_model(model_url: str = "https://huggingface.co/stabilityai/stable-d
     StableDiffusionSafetyChecker.from_pretrained(
         SAFETY_MODEL_ID,
         cache_dir=model_cache_path,
+        token=token,
     )
 
     StableDiffusionPipeline.from_pretrained(
         model_id,
         cache_dir=model_cache_path,
+        token=token,
     )
 
 # ---------------------------------------------------------------------------- #
