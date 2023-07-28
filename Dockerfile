@@ -22,7 +22,7 @@ RUN python3 -m pip install --upgrade pip && \
 
 # Fetch the model
 COPY builder/model_fetcher.py /model_fetcher.py
-RUN python /model_fetcher.py --model_url=${MODEL_URL}
+RUN python /model_fetcher.py
 RUN rm /model_fetcher.py
 
 # Add src files (Worker Template)
