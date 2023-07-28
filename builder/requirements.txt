@@ -2,3 +2,8 @@
 # Reccomended to lock the version number to avoid unexpected changes.
 
 runpod==0.10.0
+diffusers
+invisible_watermark
+transformers
+accelerate
+safetensors

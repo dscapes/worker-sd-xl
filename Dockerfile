@@ -1,5 +1,5 @@
 # Base image
-FROM nvidia/cuda:11.8.0-cudnn8-runtime-ubuntu20.04
+FROM pytorch/pytorch:2.0.1-cuda11.7-cudnn8-runtime
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -19,6 +19,11 @@ COPY builder/requirements.txt /requirements.txt
 RUN python3 -m pip install --upgrade pip && \
     python3 -m pip install --upgrade -r /requirements.txt --no-cache-dir && \
     rm /requirements.txt
+
+# Fetch the model
+COPY builder/model_fetcher.py /model_fetcher.py
+RUN python /model_fetcher.py --model_url=${MODEL_URL}
+RUN rm /model_fetcher.py
 
 # Add src files (Worker Template)
 ADD src .
