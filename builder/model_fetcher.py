@@ -4,12 +4,14 @@ RunPod | serverless-ckpt-template | model_fetcher.py
 Downloads the model from the URL passed in.
 '''
 
+import os
 import shutil
 import requests
 import argparse
 from pathlib import Path
 from urllib.parse import urlparse
 
+from huggingface_hub import HfApi
 from diffusers import StableDiffusionPipeline
 from diffusers.pipelines.stable_diffusion.safety_checker import (
     StableDiffusionSafetyChecker,
@@ -18,11 +20,18 @@ from diffusers.pipelines.stable_diffusion.safety_checker import (
 SAFETY_MODEL_ID = "CompVis/stable-diffusion-safety-checker"
 MODEL_CACHE_DIR = "diffusers-cache"
 
+access_token = "hf_..."
 
 def download_model(model_url: str = "https://huggingface.co/stabilityai/stable-diffusion-xl-base-0.9"):
     '''
     Downloads the model from the URL passed in.
     '''
+    # read the environment variable
+    token = os.environ.get("HUGGINGFACE_TOKEN")
+
+    # use the token to authenticate
+    HfApi().login(token)
+
     model_cache_path = Path(MODEL_CACHE_DIR)
     if model_cache_path.exists():
         shutil.rmtree(model_cache_path)
@@ -48,7 +57,6 @@ def download_model(model_url: str = "https://huggingface.co/stabilityai/stable-d
         model_id,
         cache_dir=model_cache_path,
     )
-
 
 # ---------------------------------------------------------------------------- #
 #                                Parse Arguments                               #
