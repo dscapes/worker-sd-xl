@@ -10,6 +10,12 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 WORKDIR /
 
 # Update and upgrade the system packages (Worker Template)
+RUN apt-get update -y && \
+    apt-get upgrade -y && \
+    apt-get install --yes --no-install-recommends \
+    build-essential vim git wget ffmpeg libsm6 libxext6
+
+# Update and upgrade the system packages (Worker Template)
 COPY builder/setup.sh /setup.sh
 RUN /bin/bash /setup.sh && \
     rm /setup.sh
