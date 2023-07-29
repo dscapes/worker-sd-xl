@@ -24,7 +24,7 @@ if token is None:
 SAFETY_MODEL_ID = "CompVis/stable-diffusion-safety-checker"
 MODEL_CACHE_DIR = "diffusers-cache"
 
-def download_model(model_url: str = "https://huggingface.co/stabilityai/stable-diffusion-xl-base-0.9"):
+def download_model(model_url: str = "https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0"):
     '''
     Downloads the model from the URL passed in.
     '''
@@ -62,7 +62,7 @@ def download_model(model_url: str = "https://huggingface.co/stabilityai/stable-d
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument(
     "--model_url", type=str,
-    default="https://huggingface.co/stabilityai/stable-diffusion-2-1",
+    default="https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0",
     help="URL of the model to download."
 )
 
