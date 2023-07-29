@@ -17,8 +17,9 @@ from diffusers.pipelines.stable_diffusion.safety_checker import (
 )
 from huggingface_hub._login import _login
 
-# token = os.environ.get("HUGGINGFACE_TOKEN", None)
-# _login(token=token, add_to_git_credential=False)
+token = os.environ.get("HUGGINGFACE_TOKEN", None)
+if token is None:
+    print('token is None in model_fetcher')
 
 SAFETY_MODEL_ID = "CompVis/stable-diffusion-safety-checker"
 MODEL_CACHE_DIR = "diffusers-cache"

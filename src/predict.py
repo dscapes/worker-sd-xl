@@ -10,6 +10,10 @@ from huggingface_hub._login import _login
 # from PIL import Image
 MODEL_CACHE = "diffusers-cache"
 
+token = os.environ.get("HUGGINGFACE_TOKEN", None)
+if token is None:
+    print('token is None in model_fetcher')
+
 def list_directory_contents(directory):
     return os.listdir(directory)
 
@@ -37,14 +41,11 @@ class Predictor:
 
 
     @torch.inference_mode()
-    def predict(self):
+    def predict(self, prompt, negative_prompt):
         '''
         Run a single prediction on the model
         '''
-
-        prompt = "An astronaut riding a green horse"
-
-        output = self.txt2img_pipe(prompt=prompt).images[0]
+        output = self.txt2img_pipe(prompt=prompt, negative_prompt=negative_prompt).images[0]
 
         output_paths = []
         for i, sample in enumerate(output.images):
