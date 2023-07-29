@@ -52,7 +52,7 @@ def download_model(model_url: str = "https://huggingface.co/stabilityai/stable-d
     StableDiffusionPipeline.from_pretrained(
         model_id,
         cache_dir=model_cache_path,
-        token="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"
+        use_auth_token="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"
     )
 
 # ---------------------------------------------------------------------------- #

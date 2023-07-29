@@ -31,7 +31,7 @@ class Predictor:
             torch_dtype=torch.float16,
             use_safetensors=True,
             variant="fp16",
-            token="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")
+            use_auth_token="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")
         self.txt2img_pipe.to("cuda")
         self.txt2img_pipe.unet = torch.compile(self.txt2img_pipe.unet, mode="reduce-overhead", fullgraph=True)
 
