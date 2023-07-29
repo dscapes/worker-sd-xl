@@ -10,9 +10,6 @@ from huggingface_hub._login import _login
 # from PIL import Image
 MODEL_CACHE = "diffusers-cache"
 
-token = os.environ.get("HUGGINGFACE_TOKEN", None)
-_login(token=token, add_to_git_credential=False)
-
 def list_directory_contents(directory):
     return os.listdir(directory)
 
@@ -34,7 +31,7 @@ class Predictor:
             torch_dtype=torch.float16,
             use_safetensors=True,
             variant="fp16",
-            token=token)
+            token="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")
         self.txt2img_pipe.to("cuda")
         self.txt2img_pipe.unet = torch.compile(self.txt2img_pipe.unet, mode="reduce-overhead", fullgraph=True)
 
