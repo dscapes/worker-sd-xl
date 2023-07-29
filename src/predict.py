@@ -5,9 +5,13 @@ from typing import List
 
 import torch
 from diffusers import DiffusionPipeline
+from huggingface_hub._login import _login
 
 # from PIL import Image
 MODEL_CACHE = "diffusers-cache"
+
+token = os.getenv("HUGGINGFACE_TOKEN")
+_login(token=token, add_to_git_credential=False)
 
 def list_directory_contents(directory):
     return os.listdir(directory)
@@ -25,7 +29,12 @@ class Predictor:
         '''
         Load the model into memory to make running multiple predictions efficient
         '''
-        self.txt2img_pipe = DiffusionPipeline.from_pretrained("stabilityai/stable-diffusion-xl-base-0.9", torch_dtype=torch.float16, use_safetensors=True, variant="fp16")
+        self.txt2img_pipe = DiffusionPipeline.from_pretrained(
+            "stabilityai/stable-diffusion-xl-base-0.9",
+            torch_dtype=torch.float16,
+            use_safetensors=True,
+            variant="fp16",
+            token=token)
         self.txt2img_pipe.to("cuda")
         self.txt2img_pipe.unet = torch.compile(self.txt2img_pipe.unet, mode="reduce-overhead", fullgraph=True)
 
