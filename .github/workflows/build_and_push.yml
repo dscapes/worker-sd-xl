@@ -20,6 +20,15 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
 
+    - name: Clean up disk space
+      run: |
+        sudo rm -rf /usr/share/dotnet
+        sudo rm -rf /opt/ghc
+        sudo rm -rf "/usr/local/share/boost"
+        sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+        sudo apt-get autoclean
+        docker system prune -a --volumes --force
+
     - name: Login to DockerHub
       run: echo "${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}" | docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin
 
