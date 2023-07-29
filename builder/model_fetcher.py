@@ -17,7 +17,7 @@ from diffusers.pipelines.stable_diffusion.safety_checker import (
 )
 from huggingface_hub._login import _login
 
-token = os.getenv("HUGGINGFACE_TOKEN")
+token = os.environ.get("HUGGINGFACE_TOKEN", None)
 _login(token=token, add_to_git_credential=False)
 
 SAFETY_MODEL_ID = "CompVis/stable-diffusion-safety-checker"

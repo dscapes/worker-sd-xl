@@ -10,7 +10,7 @@ from huggingface_hub._login import _login
 # from PIL import Image
 MODEL_CACHE = "diffusers-cache"
 
-token = os.getenv("HUGGINGFACE_TOKEN")
+token = os.environ.get("HUGGINGFACE_TOKEN", None)
 _login(token=token, add_to_git_credential=False)
 
 def list_directory_contents(directory):
