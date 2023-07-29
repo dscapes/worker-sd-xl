@@ -41,7 +41,7 @@ class Predictor:
 
 
     @torch.inference_mode()
-    def predict(self, prompt, negative_prompt):
+    def predict(self, prompt, negative_prompt, width, height, seed):
         '''
         Run a single prediction on the model
         '''
