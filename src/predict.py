@@ -65,12 +65,12 @@ class Predictor:
             denoising_end=high_noise_frac,
             output_type="latent",
         ).images
-        image = self.refiner(
+        output = self.refiner(
             prompt=prompt,
             num_inference_steps=n_steps,
             denoising_start=high_noise_frac,
             image=image,
-        ).images[0]
+        )
 
         output_paths = []
         for i, sample in enumerate(output.images):
