@@ -12,7 +12,7 @@ jobs:
 
     env:
       DOCKER_BUILDKIT: 1
-      IMAGE_NAME: worker-sd-xl
+      IMAGE_NAME: runpod-worker-a1111
       DOCKERFILE_PATH: Dockerfile
       DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
 
