@@ -30,6 +30,9 @@ class Predictor:
         '''
         self.model_tag = model_tag
         self.device = "cuda"
+        self.base = None
+        self.refiner = None
+        self.NSFW = True
 
     def setup(self):
         '''
