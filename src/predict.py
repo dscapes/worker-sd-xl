@@ -2,6 +2,7 @@
 
 import os
 from typing import List
+from pathlib import Path
 
 import torch
 from diffusers import DiffusionPipeline
@@ -46,12 +47,15 @@ class Predictor:
             # Очистим кэш CUDA перед загрузкой модели
             torch.cuda.empty_cache()
             
-            self.base = DiffusionPipeline.from_pretrained(
-                self.model_tag, #"stabilityai/stable-diffusion-xl-base-1.0"
+            # Используем скачанную модель из /diffusers-cache
+            model_path = next(Path("/diffusers-cache").glob("*"))  # получаем путь к файлу модели
+            print(f"Loading model from: {model_path}")  # для отладки
+            
+            self.base = DiffusionPipeline.from_single_file(
+                model_path,
                 torch_dtype=torch.float16,
                 use_safetensors=True,
-                variant="fp16",
-                use_auth_token=self.hf_token
+                variant="fp16"
             )
             self.base.to(self.device)
             

@@ -61,11 +61,13 @@ def get_models():
     '''
     Get a list of all LoRA, ESRGAN, and embedding models on the server.
     '''
+    base_models = os.listdir('/diffusers-cache') if os.path.exists('/diffusers-cache') else []
     lora_models = os.listdir('/loras') if os.path.exists('/loras') else []
     esrgan_models = os.listdir('/esrgan') if os.path.exists('/esrgan') else []
     embedding_models = os.listdir('/embeddings') if os.path.exists('/embeddings') else []
 
     return {
+        "checkpoints": base_models,
         "loras": lora_models,
         "esrgan": esrgan_models,
         "embeddings": embedding_models
@@ -143,12 +145,15 @@ def handle_txt2img(validated_input, job):
         for embedding in embeddings:
             embedding['path'] = f"/embeddings/{embedding['path']}"
 
+    # Получаем seed, если он не указан, генерируем случайный
+    seed = validated_input.get('seed', int.from_bytes(os.urandom(2), "big"))
+
     img_paths = MODEL.predict(
         prompt=validated_input["prompt"],  # только prompt обязательный
         negative_prompt=validated_input.get("negative_prompt"),
         width=validated_input.get("width", 512),
         height=validated_input.get("height", 512),
-        seed=validated_input.get("seed", int.from_bytes(os.urandom(2), "big")),
+        seed=seed,
         num_inference_steps=validated_input.get("num_inference_steps", 20),
         guidance_scale=validated_input.get("guidance_scale", 7.5),
         num_images_per_prompt=validated_input.get("num_outputs", 1),
@@ -165,7 +170,7 @@ def handle_txt2img(validated_input, job):
 
         job_output.append({
             "image": image_url,
-            "seed": validated_input['seed'] + index
+            "seed": seed + index
         })
 
     # Remove downloaded input objects
@@ -190,12 +195,15 @@ def handle_txt2img_raw(validated_input, job):
         for embedding in embeddings:
             embedding['path'] = f"/embeddings/{embedding['path']}"
 
+    # Получаем seed, если он не указан, генерируем случайный
+    seed = validated_input.get('seed', int.from_bytes(os.urandom(2), "big"))
+
     img_paths = MODEL.predict(
         prompt=validated_input["prompt"],
         negative_prompt=validated_input.get("negative_prompt", None),
         width=validated_input.get('width', 512),
         height=validated_input.get('height', 512),
-        seed=validated_input.get('seed', int.from_bytes(os.urandom(2), "big")),
+        seed=seed,
         loras=loras,
         upscale=validated_input.get('upscale', None)
     )
@@ -208,7 +216,7 @@ def handle_txt2img_raw(validated_input, job):
 
         job_output.append({
             "image": f"data:image/png;base64,{encoded_string}",
-            "seed": validated_input['seed'] + index
+            "seed": seed + index
         })
 
     # Remove downloaded input objects
