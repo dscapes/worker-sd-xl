@@ -15,8 +15,9 @@ jobs:
       IMAGE_NAME: runpod-worker-a1111
       DOCKERFILE_PATH: Dockerfile
       DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
-      MODEL_URL: ${{ secrets.MODEL_URL }}
+      MODEL_URL: ${{ vars.MODEL_URL }}
       CIVITAI_TOKEN: ${{ secrets.CIVITAI_TOKEN }}
+      HF_TOKEN: ${{ secrets.HF_TOKEN }}
 
     steps:
     - name: Checkout repository
@@ -35,7 +36,7 @@ jobs:
       run: echo "${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}" | docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin
 
     - name: Build Docker image
-      run: docker build --build-arg MODEL_URL=${MODEL_URL:-"https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0"} --build-arg CIVITAI_TOKEN=${CIVITAI_TOKEN} -t ${{ env.DOCKER_HUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest .
+      run: docker build --build-arg MODEL_URL=${MODEL_URL} --build-arg CIVITAI_TOKEN=${CIVITAI_TOKEN} --build-arg HF_TOKEN=${HF_TOKEN} -t ${{ env.DOCKER_HUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest .
 
     - name: Push Docker image
       run: docker push ${{ env.DOCKER_HUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest

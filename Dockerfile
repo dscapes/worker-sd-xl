@@ -9,6 +9,9 @@ ENV MODEL_URL=${MODEL_URL}
 ARG CIVITAI_TOKEN
 ENV CIVITAI_TOKEN=${CIVITAI_TOKEN}
 
+ARG HF_TOKEN
+ENV HF_TOKEN=${HF_TOKEN}
+
 # Use bash shell with pipefail option
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
@@ -40,4 +43,4 @@ RUN rm /model_fetcher.py
 # Add src files (Worker Template)
 ADD src .
 
-CMD python3 -u /handler.py --civitai_token=${CIVITAI_TOKEN}
+CMD python3 -u /handler.py --civitai_token=${CIVITAI_TOKEN} --hf_token=${HF_TOKEN}

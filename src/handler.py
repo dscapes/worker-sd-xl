@@ -251,13 +251,14 @@ def handle_add_embedding(validated_input):
 
 # Grab args
 parser = argparse.ArgumentParser()
-parser.add_argument('--model_tag', type=str, default="stabilityai/stable-diffusion-xl-base-0.9")
+parser.add_argument('--model_tag', type=str, default="stabilityai/stable-diffusion-xl-base-1.0")
 parser.add_argument('--civitai_token', type=str, help='Civitai API token')
+parser.add_argument('--hf_token', type=str, help='HuggingFace token')
 
 if __name__ == "__main__":
     args = parser.parse_args()
 
-    MODEL = predict.Predictor(model_tag=args.model_tag)
+    MODEL = predict.Predictor(model_tag=args.model_tag, hf_token=args.hf_token)
     MODEL.setup()
 
     runpod.serverless.start({"handler": run})

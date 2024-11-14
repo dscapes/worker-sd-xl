@@ -24,12 +24,13 @@ def list_directory_contents(directory):
 class Predictor:
     '''Predictor class for StableDiffusionXL-v0.9'''
 
-    def __init__(self, model_tag="stabilityai/stable-diffusion-xl-base-1.0"):
+    def __init__(self, model_tag, hf_token):
         '''
         Initialize the Predictor class
         '''
         self.model_tag = model_tag
         self.device = "cuda"
+        self.hf_token = hf_token
         self.base = None
         self.refiner = None
         self.NSFW = True
@@ -49,7 +50,8 @@ class Predictor:
                 self.model_tag, #"stabilityai/stable-diffusion-xl-base-1.0"
                 torch_dtype=torch.float16,
                 use_safetensors=True,
-                variant="fp16"
+                variant="fp16",
+                use_auth_token=self.hf_token
             )
             self.base.to(self.device)
             
