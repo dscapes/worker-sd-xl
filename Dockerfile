@@ -6,6 +6,9 @@ ENV DEBIAN_FRONTEND=noninteractive
 ARG MODEL_URL
 ENV MODEL_URL=${MODEL_URL}
 
+ARG CIVITAI_TOKEN
+ENV CIVITAI_TOKEN=${CIVITAI_TOKEN}
+
 # Use bash shell with pipefail option
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
@@ -31,10 +34,10 @@ RUN python3 -m pip install --upgrade pip && \
 
 # Fetch the model using environment variable
 COPY builder/model_fetcher.py /model_fetcher.py
-RUN python /model_fetcher.py --model_url ${MODEL_URL}
+RUN python /model_fetcher.py --model_url ${MODEL_URL} --civitai_token ${CIVITAI_TOKEN}
 RUN rm /model_fetcher.py
 
 # Add src files (Worker Template)
 ADD src .
 
-CMD python3 -u /handler.py
+CMD python3 -u /handler.py --civitai_token=${CIVITAI_TOKEN}

@@ -39,7 +39,13 @@ def download_model(model_url: str = "https://huggingface.co/stabilityai/stable-d
     if parsed_url.netloc == "huggingface.co":
         model_id = f"{parsed_url.path.strip('/')}"
     else:
-        downloaded_model = requests.get(model_url, stream=True, timeout=600)
+        download_url = model_url
+        if parsed_url.netloc == "civitai.com" and args.civitai_token:
+            # Добавляем токен к существующим параметрам или создаем новые
+            separator = '&' if '?' in model_url else '?'
+            download_url = f"{model_url}{separator}token={args.civitai_token}"
+            
+        downloaded_model = requests.get(download_url, stream=True, timeout=600)
         with open(model_cache_path / "model.zip", "wb") as f:
             for chunk in downloaded_model.iter_content(chunk_size=1024):
                 if chunk:
@@ -65,6 +71,7 @@ parser.add_argument(
     default="https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0",
     help="URL of the model to download."
 )
+parser.add_argument('--civitai_token', type=str, help='Civitai API token')
 
 if __name__ == "__main__":
     args = parser.parse_args()

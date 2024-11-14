@@ -19,11 +19,19 @@ def download_and_save(url, save_dir):
     Download a file from a URL and save it to the specified directory.
     '''
     try:
-        response = requests.get(url)
+        parsed_url = urlparse(url)
+        download_url = url
+        
+        if parsed_url.netloc == "civitai.com" and args.civitai_token:
+            # Добавляем токен к существующим параметрам или создаем новые
+            separator = '&' if '?' in url else '?'
+            download_url = f"{url}{separator}token={args.civitai_token}"
+            
+        response = requests.get(download_url)
         response.raise_for_status()
         
         os.makedirs(save_dir, exist_ok=True)
-        filename = os.path.basename(urlparse(url).path)
+        filename = os.path.basename(parsed_url.path)
         save_path = os.path.join(save_dir, filename)
         
         with open(save_path, 'wb') as f:
@@ -214,6 +222,7 @@ def handle_add_embedding(validated_input):
 # Grab args
 parser = argparse.ArgumentParser()
 parser.add_argument('--model_tag', type=str, default="stabilityai/stable-diffusion-xl-base-0.9")
+parser.add_argument('--civitai_token', type=str, help='Civitai API token')
 
 if __name__ == "__main__":
     args = parser.parse_args()

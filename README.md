@@ -57,7 +57,7 @@ Recommended XL image resolutions:
 ```json
 {
     "input": {
-        "method": "get_moldels"
+        "method": "get_models"
     }
 }
 ```

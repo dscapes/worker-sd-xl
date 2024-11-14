@@ -16,6 +16,7 @@ jobs:
       DOCKERFILE_PATH: Dockerfile
       DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
       MODEL_URL: ${{ secrets.MODEL_URL }}
+      CIVITAI_TOKEN: ${{ secrets.CIVITAI_TOKEN }}
 
     steps:
     - name: Checkout repository
@@ -34,7 +35,7 @@ jobs:
       run: echo "${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}" | docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin
 
     - name: Build Docker image
-      run: docker build --build-arg MODEL_URL=${MODEL_URL:-"https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0"} -t ${{ env.DOCKER_HUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest .
+      run: docker build --build-arg MODEL_URL=${MODEL_URL:-"https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0"} --build-arg CIVITAI_TOKEN=${CIVITAI_TOKEN} -t ${{ env.DOCKER_HUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest .
 
     - name: Push Docker image
       run: docker push ${{ env.DOCKER_HUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest
