@@ -14,3 +14,8 @@ torch
 numpy
 Pillow
 requests
+peft  # for LoRA
+basicsr  # for ESRGAN
+realesrgan  # for ESRGAN
+facexlib  # for ESRGAN (optional)
+gfpgan  # for ESRGAN (optional)

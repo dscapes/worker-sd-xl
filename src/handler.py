@@ -23,15 +23,30 @@ def download_and_save(url, save_dir):
         download_url = url
         
         if parsed_url.netloc == "civitai.com" and args.civitai_token:
-            # Добавляем токен к существующим параметрам или создаем новые
             separator = '&' if '?' in url else '?'
             download_url = f"{url}{separator}token={args.civitai_token}"
             
         response = requests.get(download_url)
         response.raise_for_status()
         
+        # Получаем Content-Disposition header для имени файла
+        content_disposition = response.headers.get('Content-Disposition')
+        if content_disposition and 'filename=' in content_disposition:
+            filename = content_disposition.split('filename=')[1].strip('"\'')
+        else:
+            # Если нет Content-Disposition, используем ID из URL и правильное расширение
+            path_parts = parsed_url.path.rstrip('/').split('/')
+            model_id = path_parts[-1]
+            
+            if save_dir == '/esrgan':
+                ext = '.pth'
+            elif save_dir == '/embeddings':
+                ext = '.pt'
+            else:
+                ext = '.safetensors'
+            filename = f"{model_id}{ext}"
+        
         os.makedirs(save_dir, exist_ok=True)
-        filename = os.path.basename(parsed_url.path)
         save_path = os.path.join(save_dir, filename)
         
         with open(save_path, 'wb') as f:
@@ -123,6 +138,11 @@ def handle_txt2img(validated_input, job):
             if 'scale' not in lora:
                 lora['scale'] = 1.0  # значение по умолчанию
 
+    embeddings = validated_input.get("embeddings", None)
+    if embeddings is not None:
+        for embedding in embeddings:
+            embedding['path'] = f"/embeddings/{embedding['path']}"
+
     img_paths = MODEL.predict(
         prompt=validated_input["prompt"],
         negative_prompt=validated_input.get("negative_prompt", None),
@@ -159,6 +179,11 @@ def handle_txt2img_raw(validated_input, job):
             lora['path'] = f"/loras/{lora['path']}"
             if 'scale' not in lora:
                 lora['scale'] = 1.0  # значение по умолчанию
+
+    embeddings = validated_input.get("embeddings", None)
+    if embeddings is not None:
+        for embedding in embeddings:
+            embedding['path'] = f"/embeddings/{embedding['path']}"
 
     img_paths = MODEL.predict(
         prompt=validated_input["prompt"],

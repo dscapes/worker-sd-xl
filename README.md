@@ -2,7 +2,9 @@
 
 [Docker](https://hub.docker.com/) image builder for [RunPod](https://www.runpod.io/) Serverless [API](https://docs.runpod.io/docs/custom-apis).<br>
 Provides a simple API for generating images with SDXL models and their LoRAs.<br>
-Can upscale images with RealESRGAN and download embeddings, Lora and ESRGAN models to the model list by API.
+Can upscale images with RealESRGAN.<br>
+Downloads Embeddings, LoRAs and ESRGAN models by API.<br>
+Returns a list of models by API.
 
 Default model can be changed by `MODEL_URL` GitHub variable.
 
@@ -21,16 +23,16 @@ Recommended XL image resolutions:
 640 x 1536 (5:12 Vertical, the closest to the iPhone resolution)
 ```
 
-# API Reference
+# Serverless API
 
-**TODO:** Add `MODEL_URL` override support to the RunPod template. Embedding & inpainting support.
+**TODO:** Add `MODEL_URL` override support to the RunPod template & img2img / inpainting support.
 
 ## Input Schema
 
 ```json
 {
     "input": {
-        "method": "txt2img | txt2img_raw",
+        "method": "txt2img_raw",
         "prompt": "a photo of a cat",
         "negative_prompt": "bad quality, blurry"
     }
@@ -46,8 +48,8 @@ Recommended XL image resolutions:
 ```json
 {
     "input": {
-        "method": "add_lora | add_esrgan | add_embedding",
-        "url": "https://example.com/my_lora.safetensors"
+        "method": "add_lora",
+        "url": "https://civitai.com/api/download/models/585966"
     }
 }
 ```
@@ -62,26 +64,24 @@ Recommended XL image resolutions:
 }
 ```
 
-## Input Schema `txt2img` `txt2img_raw`
+## Input LoRAs Schema `txt2img` `txt2img_raw`
 
 ```json
 {
-    "method": "txt2img | txt2img_raw",
-    "prompt": "a photo of a cat",
-    "negative_prompt": "bad quality, blurry",
-    "width": 512,
-    "height": 512,
-    "seed": 123456,
-    "loras": [
-        {
-            "path": "my_lora.safetensors",
-            "scale": 0.75
-        },
-        {
-            "path": "another_lora.safetensors",
-            "scale": 0.5
-        }
-    ]
+    "input": {
+        "method": "txt2img_raw",
+        "prompt": "1girl, Fenrys",
+        "negative_prompt": "bad quality, blurry",
+        "width": 1024,
+        "height": 1024,
+        "seed": 123456,
+        "loras": [
+            {
+                "path": "Fenrys.safetensors",
+                "scale": 1.0
+            }
+        ]
+    }
 }
 ```
 
@@ -89,25 +89,47 @@ Recommended XL image resolutions:
 
 ```json
 {
-    "prompt": "a photo of a cat",
-    "negative_prompt": "bad quality",
-    "width": 512,
-    "height": 512,
-    "steps": 40,
-    "denoising_strength": 0.8,
-    "loras": [
-        {
-            "path": "my_lora.safetensors",
-            "scale": 0.75
+    "input": {
+        "method": "txt2img_raw",
+        "prompt": "a photo of a cat",
+        "negative_prompt": "bad quality",
+        "width": 1024,
+        "height": 1024,
+        "steps": 20,
+        "denoising_strength": 0.8,
+        "upscale": {
+            "model_path": "4x_foolhardy_Remacri.pth",
+            "scale": 2.0,
+            "denoise_strength": 0.5,
+            "tile_size": 400,
+            "tile_padding": 10
         }
-    ],
-    "upscale": {
-        "model_path": "RealESRGAN_x4plus.pth",
-        "scale": 2.0,
-        "denoise_strength": 0.5,
-        "tile_size": 400,
-        "tile_padding": 10
     }
 }
 ```
 
+## Input Embeddings Schema `txt2img` `txt2img_raw`
+
+```json
+{
+    "input": {
+        "method": "txt2img_raw",
+        "prompt": "a photo of <cat-toy> in the garden",
+        "embeddings": [
+            {
+                "path": "cat-toy.pt",
+                "trigger_word": "cat-toy"
+            }
+        ]
+    }
+}
+```
+
+## GitHub Variables
+`IMAGE_NAME`
+`MODEL_URL`
+
+## GitHub Secrets
+`CIVITAI_TOKEN`
+`DOCKER_HUB_ACCESS_TOKEN`
+`DOCKER_HUB_USERNAME`

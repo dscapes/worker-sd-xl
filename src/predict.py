@@ -73,12 +73,12 @@ class Predictor:
 
     def load_embeddings(self, embeddings):
         '''
-        Загружает эмбединги в модель
+        Load embeddings into the model
         "input": {
             "prompt": "a photo of <cat-toy> in the garden",
             "embeddings": [
                 {
-                    "path": "/embeddings/cat-toy.pt",
+                    "path": "cat-toy.pt",
                     "trigger_word": "cat-toy"
                 }
             ]
