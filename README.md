@@ -4,6 +4,33 @@
 
 ```
 {
+    "method": "txt2img | txt2img_raw",
+    "input": "a photo of a cat"
+}
+```
+
+txt2img - array of links to the images
+txt2img_raw - array of base64 images
+
+```
+{
+    "method": "get_moldels | add_lora | add_esrgan | add_embedding",
+    "input": {
+        "url": "https://example.com/my_lora.safetensors"
+    }
+}
+```
+
+```
+{
+    "method": "get_moldels"
+}
+```
+
+## Input Schema txt2img | txt2img_raw
+
+```
+{
     "prompt": "a photo of a cat",
     "negative_prompt": "bad quality, blurry",
     "width": 512,
@@ -22,7 +49,7 @@
 }
 ```
 
-## Upscale Schema
+## Input Upscale Schema txt2img | txt2img_raw
 
 ```
 {

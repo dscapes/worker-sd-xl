@@ -41,10 +41,14 @@ def get_models():
 def run(job):
     '''
     Run inference on the model.
-    Returns output path, width the seed used to generate the image.
     '''
-    job_method = job['method']
+    print("Received job:", job)
+
     job_input = job['input']
+    if 'method' not in job_input:
+        return {"error": "Method is required in input"}
+
+    job_method = job_input['method']
 
     # Input validation
     if job_method == "txt2img":
@@ -55,7 +59,7 @@ def run(job):
         validated_input = validate(job_input, ADD_ESRGAN_SCHEMA)
     elif job_method == "add_embedding":
         validated_input = validate(job_input, ADD_EMBEDDING_SCHEMA)
-    else:
+    else: # get_models
         validated_input = {}
 
     if 'errors' in validated_input:
