@@ -5,7 +5,7 @@ from typing import List
 from pathlib import Path
 
 import torch
-from diffusers import DiffusionPipeline
+from diffusers import StableDiffusionXLPipeline
 from huggingface_hub._login import _login
 from basicsr.archs.rrdbnet_arch import RRDBNet
 from realesrgan import RealESRGANer
@@ -33,7 +33,7 @@ class Predictor:
         self.device = "cuda"
         self.hf_token = hf_token
         self.base = None
-        self.refiner = None
+        #self.refiner = None
         self.NSFW = True
 
     def setup(self):
@@ -51,7 +51,7 @@ class Predictor:
             model_path = next(Path("/diffusers-cache").glob("*"))  # получаем путь к файлу модели
             print(f"Loading model from: {model_path}")  # для отладки
             
-            self.base = DiffusionPipeline.from_single_file(
+            self.base = StableDiffusionXLPipeline.from_single_file(
                 model_path,
                 torch_dtype=torch.float16,
                 use_safetensors=True,
@@ -59,15 +59,15 @@ class Predictor:
             )
             self.base.to(self.device)
             
-            self.refiner = DiffusionPipeline.from_pretrained(
-                "stabilityai/stable-diffusion-xl-refiner-1.0",
-                text_encoder_2=self.base.text_encoder_2,
-                vae=self.base.vae,
-                torch_dtype=torch.float16,
-                use_safetensors=True,
-                variant="fp16",
-            )
-            self.refiner.to(self.device)
+            # self.refiner = DiffusionPipeline.from_pretrained(
+            #     "stabilityai/stable-diffusion-xl-refiner-1.0",
+            #     text_encoder_2=self.base.text_encoder_2,
+            #     vae=self.base.vae,
+            #     torch_dtype=torch.float16,
+            #     use_safetensors=True,
+            #     variant="fp16",
+            # )
+            # self.refiner.to(self.device)
 
             # Инициализируем словарь для хранения апскейлеров
             self.upsamplers = {}
@@ -110,11 +110,11 @@ class Predictor:
                 embedding['path'],
                 token=embedding['trigger_word']
             )
-            # Для рефайнера тоже загружаем
-            self.refiner.load_textual_inversion(
-                embedding['path'],
-                token=embedding['trigger_word']
-            )
+            # # Для рефайнера тоже загружаем
+            # self.refiner.load_textual_inversion(
+            #     embedding['path'],
+            #     token=embedding['trigger_word']
+            # )
 
     @torch.inference_mode()
     def predict(self, prompt, negative_prompt, width, height, seed, 
@@ -178,13 +178,13 @@ class Predictor:
                     ).images
         """
 
-        output = self.refiner(
-            prompt=prompt,
-            negative_prompt=negative_prompt,
-            num_inference_steps=num_inference_steps,
-            denoising_start=0.8,
-            image=image,
-        )
+        # output = self.refiner(
+        #     prompt=prompt,
+        #     negative_prompt=negative_prompt,
+        #     num_inference_steps=num_inference_steps,
+        #     denoising_start=0.8,
+        #     image=image,
+        # )
 
         # Отключаем LoRA если использовались
         if loras:
@@ -193,7 +193,7 @@ class Predictor:
         # Отключаем эмбединги после использования
         if embeddings:
             self.base.unload_textual_inversion()
-            self.refiner.unload_textual_inversion()
+            # self.refiner.unload_textual_inversion()
 
         output_paths = []
         for i, sample in enumerate(output.images):
