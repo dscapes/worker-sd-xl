@@ -53,6 +53,8 @@ def run(job):
     # Input validation
     if job_method == "txt2img":
         validated_input = validate(job_input, INPUT_SCHEMA)
+    elif job_method == "txt2img_raw":
+        validated_input = validate(job_input, INPUT_SCHEMA)
     elif job_method == "add_lora":
         validated_input = validate(job_input, ADD_LORA_SCHEMA)
     elif job_method == "add_esrgan":
@@ -74,9 +76,6 @@ def run(job):
     )  # pylint: disable=unbalanced-tuple-unpacking
 
     MODEL.NSFW = validated_input.get('nsfw', True)
-
-    if validated_input['seed'] is None:
-        validated_input['seed'] = int.from_bytes(os.urandom(2), "big")
 
     # Router for different job methods
     if job_method == "txt2img":
@@ -111,7 +110,7 @@ def handle_txt2img(validated_input, job):
         negative_prompt=validated_input.get("negative_prompt", None),
         width=validated_input.get('width', 512),
         height=validated_input.get('height', 512),
-        seed=validated_input['seed'],
+        seed=validated_input.get('seed', int.from_bytes(os.urandom(2), "big")),
         loras=loras  # Добавляем параметр loras
     )
 
@@ -147,7 +146,7 @@ def handle_txt2img_raw(validated_input, job):
         negative_prompt=validated_input.get("negative_prompt", None),
         width=validated_input.get('width', 512),
         height=validated_input.get('height', 512),
-        seed=validated_input['seed'],
+        seed=validated_input.get('seed', int.from_bytes(os.urandom(2), "big")),
         loras=loras  # Добавляем параметр loras
     )
 

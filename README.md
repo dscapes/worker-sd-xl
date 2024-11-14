@@ -1,30 +1,43 @@
 # API Reference
 
+[Docker](https://hub.docker.com/) image builder for [RunPod](https://www.runpod.io/) Serverless [API](https://docs.runpod.io/sdks/python/apis).<br>
+Provides a simple API for generating images with SDXL models and their LoRAs.<br>
+Can upscale images with RealESRGAN and download embeddings, Lora and ESRGAN models to the model list by API.
+
+Default model can be changed by `MODEL_URL` GitHub variable.
+
+**TODO:** Add `MODEL_URL` override support to the RunPod template.
+
 ## Input Schema
 
-```
+```json
 {
     "input": {
         "method": "txt2img | txt2img_raw",
         "prompt": "a photo of a cat",
-        "negative_prompt": "bad quality, blurry",
+        "negative_prompt": "bad quality, blurry"
     }
 }
 ```
 
-txt2img - array of links to the images
-txt2img_raw - array of base64 images
+`txt2img` - array of **links** to the images
 
-```
+`txt2img_raw` - array of **base64** images
+
+---
+
+```json
 {
     "input": {
-        "method": "get_moldels | add_lora | add_esrgan | add_embedding",
+        "method": "add_lora | add_esrgan | add_embedding",
         "url": "https://example.com/my_lora.safetensors"
     }
 }
 ```
 
-```
+## Input Schema `get_moldels` 
+
+```json
 {
     "input": {
         "method": "get_moldels"
@@ -32,9 +45,9 @@ txt2img_raw - array of base64 images
 }
 ```
 
-## Input Schema txt2img | txt2img_raw
+## Input Schema `txt2img` `txt2img_raw`
 
-```
+```json
 {
     "method": "txt2img | txt2img_raw",
     "prompt": "a photo of a cat",
@@ -55,9 +68,9 @@ txt2img_raw - array of base64 images
 }
 ```
 
-## Input Upscale Schema txt2img | txt2img_raw
+## Input Upscale Schema `txt2img` `txt2img_raw`
 
-```
+```json
 {
     "prompt": "a photo of a cat",
     "negative_prompt": "bad quality",

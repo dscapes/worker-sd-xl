@@ -1,4 +1,8 @@
 INPUT_SCHEMA = {
+    'method': {
+        'type': str,
+        'required': False
+    },
     'prompt': {
         'type': str,
         'required': True
@@ -100,6 +104,10 @@ INPUT_SCHEMA = {
 }
 
 ADD_LORA_SCHEMA = {
+    'method': {
+        'type': str,
+        'required': False
+    },
     'url': {
         'type': str,
         'required': True
@@ -107,6 +115,10 @@ ADD_LORA_SCHEMA = {
 }
 
 ADD_ESRGAN_SCHEMA = {
+    'method': {
+        'type': str,
+        'required': False
+    },
     'url': {
         'type': str,
         'required': True
@@ -114,6 +126,10 @@ ADD_ESRGAN_SCHEMA = {
 }
 
 ADD_EMBEDDING_SCHEMA = {
+    'method': {
+        'type': str,
+        'required': False
+    },
     'url': {
         'type': str,
         'required': True
