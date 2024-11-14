@@ -9,4 +9,8 @@ accelerate
 safetensors
 huggingface-hub
 basicsr
+realesrgan
+torch
+numpy
+Pillow
 requests
