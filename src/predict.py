@@ -29,30 +29,42 @@ class Predictor:
         Initialize the Predictor class
         '''
         self.model_tag = model_tag
+        self.device = "cuda"
 
     def setup(self):
         '''
         Load the model into memory to make running multiple predictions efficient
         '''
-        self.base = DiffusionPipeline.from_pretrained(
-            "stabilityai/stable-diffusion-xl-base-1.0",
-            torch_dtype=torch.float16,
-            use_safetensors=True,
-            variant="fp16",
-            use_auth_token="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")
-        self.base.to("cuda")
-        self.refiner = DiffusionPipeline.from_pretrained(
-            "stabilityai/stable-diffusion-xl-refiner-1.0",
-            text_encoder_2=self.base.text_encoder_2,
-            vae=self.base.vae,
-            torch_dtype=torch.float16,
-            use_safetensors=True,
-            variant="fp16",
-        )
-        self.refiner.to("cuda")
+        try:
+            if not torch.cuda.is_available():
+                raise RuntimeError("CUDA is not available")
+                
+            # Очистим кэш CUDA перед загрузкой модели
+            torch.cuda.empty_cache()
+            
+            self.base = DiffusionPipeline.from_pretrained(
+                self.model_tag, #"stabilityai/stable-diffusion-xl-base-1.0"
+                torch_dtype=torch.float16,
+                use_safetensors=True,
+                variant="fp16"
+            )
+            self.base.to(self.device)
+            
+            self.refiner = DiffusionPipeline.from_pretrained(
+                "stabilityai/stable-diffusion-xl-refiner-1.0",
+                text_encoder_2=self.base.text_encoder_2,
+                vae=self.base.vae,
+                torch_dtype=torch.float16,
+                use_safetensors=True,
+                variant="fp16",
+            )
+            self.refiner.to(self.device)
 
-        # Инициализируем словарь для хранения апскейлеров
-        self.upsamplers = {}
+            # Инициализируем словарь для хранения апскейлеров
+            self.upsamplers = {}
+
+        except Exception as e:
+            print(f"Error setting up the model: {e}")
 
     def get_upsampler(self, model_path, scale=2, tile=400, tile_pad=10):
         '''

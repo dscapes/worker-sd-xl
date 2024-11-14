@@ -1,16 +1,16 @@
 # RunPod SDXL Serverless API
 
-[Docker](https://hub.docker.com/) image builder for [RunPod](https://www.runpod.io/) Serverless [API](https://docs.runpod.io/docs/custom-apis).<br>
-Provides a simple API for generating images with SDXL models and their LoRAs.<br>
-Can upscale images with RealESRGAN.<br>
-Downloads Embeddings, LoRAs and ESRGAN models by API.<br>
-Returns a list of models by API.
+Docker image builder for [RunPod](https://www.runpod.io/) serverless worker with [API](https://docs.runpod.io/docs/custom-apis).\
+Provides a simple API for generating images with SDXL models and their LoRAs.\
+Can upscale images with RealESRGAN.\
+Downloads Embeddings / LoRAs / ESRGAN models by API.\
+Returns a list of Embeddings / LoRAs / ESRGAN models by API.
 
 Default model can be changed by `MODEL_URL` GitHub variable.
 
 # Common info
 
-Recommended XL image resolutions:
+Recommended SDXL image resolutions (before upscale):
 ```
 1024 x 1024 (1:1 Square)
 1152 x 896 (9:7)
@@ -39,8 +39,7 @@ Recommended XL image resolutions:
 }
 ```
 
-`txt2img` - array of **links** to the images
-
+`txt2img` - array of **links** to the images\
 `txt2img_raw` - array of **base64** images
 
 ## Input Schema `add_lora` `add_esrgan` `add_embedding`
