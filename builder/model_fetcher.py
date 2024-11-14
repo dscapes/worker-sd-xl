@@ -8,6 +8,7 @@ import os
 import shutil
 import requests
 import argparse
+import re
 from pathlib import Path
 from urllib.parse import urlparse
 
@@ -38,29 +39,30 @@ def download_model(model_url: str = "https://huggingface.co/stabilityai/stable-d
     parsed_url = urlparse(model_url)
     if parsed_url.netloc == "huggingface.co":
         model_id = f"{parsed_url.path.strip('/')}"
+        
+        StableDiffusionSafetyChecker.from_pretrained(
+            SAFETY_MODEL_ID,
+            cache_dir=model_cache_path,
+        )
+
+        StableDiffusionPipeline.from_pretrained(
+            model_id,
+            cache_dir=model_cache_path,
+            use_auth_token=args.hf_token
+        )
     else:
-        download_url = model_url
-        if parsed_url.netloc == "civitai.com" and args.civitai_token:
-            # Добавляем токен к существующим параметрам или создаем новые
-            separator = '&' if '?' in model_url else '?'
-            download_url = f"{model_url}{separator}token={args.civitai_token}"
-            
-        downloaded_model = requests.get(download_url, stream=True, timeout=600)
-        with open(model_cache_path / "model.zip", "wb") as f:
-            for chunk in downloaded_model.iter_content(chunk_size=1024):
+        # Получаем имя файла из заголовков ответа или из URL
+        response = requests.get(model_url, stream=True, timeout=600)
+        if 'content-disposition' in response.headers:
+            filename = re.findall("filename=(.+)", response.headers['content-disposition'])[0]
+        else:
+            filename = model_url.split('/')[-1]
+
+        # Сохраняем модель с оригинальным именем
+        with open(model_cache_path / filename, "wb") as f:
+            for chunk in response.iter_content(chunk_size=1024):
                 if chunk:
                     f.write(chunk)
-
-    StableDiffusionSafetyChecker.from_pretrained(
-        SAFETY_MODEL_ID,
-        cache_dir=model_cache_path,
-    )
-
-    StableDiffusionPipeline.from_pretrained(
-        model_id,
-        cache_dir=model_cache_path,
-        use_auth_token="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"
-    )
 
 # ---------------------------------------------------------------------------- #
 #                                Parse Arguments                               #
@@ -72,6 +74,7 @@ parser.add_argument(
     help="URL of the model to download."
 )
 parser.add_argument('--civitai_token', type=str, help='Civitai API token')
+parser.add_argument('--hf_token', type=str, help='HuggingFace token')
 
 if __name__ == "__main__":
     args = parser.parse_args()

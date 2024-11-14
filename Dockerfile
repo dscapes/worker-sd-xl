@@ -37,7 +37,7 @@ RUN python3 -m pip install --upgrade pip && \
 
 # Fetch the model using environment variable
 COPY builder/model_fetcher.py /model_fetcher.py
-RUN python /model_fetcher.py --model_url ${MODEL_URL} --civitai_token ${CIVITAI_TOKEN}
+RUN python /model_fetcher.py --model_url ${MODEL_URL} --civitai_token ${CIVITAI_TOKEN} --hf_token=${HF_TOKEN}
 RUN rm /model_fetcher.py
 
 # Add src files (Worker Template)
