@@ -3,6 +3,7 @@
 import os
 import predict
 import argparse
+import base64
 
 import runpod
 from runpod.serverless.utils.rp_validator import validate
@@ -76,6 +77,8 @@ def run(job):
     # Router for different job methods
     if job_method == "txt2img":
         return handle_txt2img(validated_input, job)
+    elif job_method == "txt2img_raw":
+        return handle_txt2img_raw(validated_input, job)
     elif job_method == "add_lora":
         return handle_add_lora(validated_input)
     elif job_method == "add_esrgan":
@@ -115,6 +118,43 @@ def handle_txt2img(validated_input, job):
 
         job_output.append({
             "image": image_url,
+            "seed": validated_input['seed'] + index
+        })
+
+    # Remove downloaded input objects
+    rp_cleanup.clean(['input_objects'])
+
+    return job_output
+
+def handle_txt2img_raw(validated_input, job):
+    '''
+    Handle txt2img method.
+    '''
+    loras = validated_input.get("loras", None)
+    if loras is not None:
+        # Преобразуем пути для каждой LoRA
+        for lora in loras:
+            lora['path'] = f"/loras/{lora['path']}"
+            if 'scale' not in lora:
+                lora['scale'] = 1.0  # значение по умолчанию
+
+    img_paths = MODEL.predict(
+        prompt=validated_input["prompt"],
+        negative_prompt=validated_input.get("negative_prompt", None),
+        width=validated_input.get('width', 512),
+        height=validated_input.get('height', 512),
+        seed=validated_input['seed'],
+        loras=loras  # Добавляем параметр loras
+    )
+
+    job_output = []
+    for index, img_path in enumerate(img_paths):
+        # Читаем изображение в base64
+        with open(img_path, "rb") as image_file:
+            encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
+
+        job_output.append({
+            "image": f"data:image/png;base64,{encoded_string}",
             "seed": validated_input['seed'] + index
         })
 
