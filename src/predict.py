@@ -97,44 +97,71 @@ class Predictor:
 
     @torch.inference_mode()
     def predict(self, prompt, negative_prompt, width, height, seed, 
-                steps=40, denoising_strength=0.8,
+                num_inference_steps=20, guidance_scale=7.5,
+                num_images_per_prompt=1, scheduler='EULER-A',
                 loras=None, upscale=None, embeddings=None):
-        '''
-        Run a single prediction on the model
-        '''
-        # Загружаем эмбединги если есть
-        if embeddings:
-            self.load_embeddings(embeddings)
-
-        # Загружаем и применяем LoRA если они есть
-        if loras:
-            for lora in loras:
-                self.base.load_lora_weights(
-                    lora['path'],
-                    weight_name="pytorch_lora_weights.safetensors",
-                    adapter_name=lora['path']
-                )
-                self.base.set_adapters(
-                    [lora['path']], 
-                    adapter_weights=[lora['scale']]
-                )
-
+        """
+        Генерация изображения
+        """
+        # Установка seed
+        if seed is not None:
+            generator = torch.Generator(device=self.device).manual_seed(seed)
+        else:
+            generator = None
+            
         # Генерация базового изображения
         image = self.base(
             prompt=prompt,
             negative_prompt=negative_prompt,
             width=width,
             height=height,
-            num_inference_steps=steps,
-            denoising_end=denoising_strength,
+            num_inference_steps=num_inference_steps,
+            guidance_scale=guidance_scale,
+            num_images_per_prompt=num_images_per_prompt,
+            generator=generator,
             output_type="latent",
         ).images
+
+        """
+        # Для будущей реализации img2img:
+        def img2img(self, prompt, init_image, mask=None, 
+                   negative_prompt=None, prompt_strength=0.8,
+                   num_inference_steps=50, guidance_scale=7.5,
+                   width=512, height=512):
+            
+            if init_image is not None:
+                if mask is not None:
+                    # Inpainting
+                    image = self.base(
+                        prompt=prompt,
+                        image=init_image,
+                        mask_image=mask,
+                        negative_prompt=negative_prompt,
+                        strength=prompt_strength,
+                        num_inference_steps=num_inference_steps,
+                        guidance_scale=guidance_scale,
+                        width=width,
+                        height=height,
+                    ).images
+                else:
+                    # img2img
+                    image = self.base(
+                        prompt=prompt,
+                        image=init_image,
+                        negative_prompt=negative_prompt,
+                        strength=prompt_strength,
+                        num_inference_steps=num_inference_steps,
+                        guidance_scale=guidance_scale,
+                        width=width,
+                        height=height,
+                    ).images
+        """
 
         output = self.refiner(
             prompt=prompt,
             negative_prompt=negative_prompt,
-            num_inference_steps=steps,
-            denoising_start=denoising_strength,
+            num_inference_steps=num_inference_steps,
+            denoising_start=0.8,
             image=image,
         )
 

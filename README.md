@@ -25,7 +25,7 @@ Recommended XL image resolutions:
 
 # Serverless API
 
-**TODO:** Add `MODEL_URL` override support to the RunPod template & img2img / inpainting support.
+**TODO:** Add img2img / inpainting / vae / controlnet support.
 
 ## Input Schema
 

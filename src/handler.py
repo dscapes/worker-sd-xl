@@ -144,13 +144,18 @@ def handle_txt2img(validated_input, job):
             embedding['path'] = f"/embeddings/{embedding['path']}"
 
     img_paths = MODEL.predict(
-        prompt=validated_input["prompt"],
-        negative_prompt=validated_input.get("negative_prompt", None),
-        width=validated_input.get('width', 512),
-        height=validated_input.get('height', 512),
-        seed=validated_input.get('seed', int.from_bytes(os.urandom(2), "big")),
+        prompt=validated_input["prompt"],  # только prompt обязательный
+        negative_prompt=validated_input.get("negative_prompt"),
+        width=validated_input.get("width", 512),
+        height=validated_input.get("height", 512),
+        seed=validated_input.get("seed", int.from_bytes(os.urandom(2), "big")),
+        num_inference_steps=validated_input.get("num_inference_steps", 20),
+        guidance_scale=validated_input.get("guidance_scale", 7.5),
+        num_images_per_prompt=validated_input.get("num_outputs", 1),
+        scheduler=validated_input.get("scheduler", "EULER-A"),
         loras=loras,
-        upscale=validated_input.get('upscale', None)
+        embeddings=embeddings,
+        upscale=validated_input.get("upscale")
     )
 
     job_output = []

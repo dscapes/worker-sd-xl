@@ -44,12 +44,12 @@ INPUT_SCHEMA = {
         'type': int,
         'required': False,
         'default': 1,
-        'constraints': lambda num_outputs: 10 > num_outputs > 0
+        'constraints': lambda num_outputs: 100 > num_outputs > 0
     },
     'num_inference_steps': {
         'type': int,
         'required': False,
-        'default': 50,
+        'default': 20,
         'constraints': lambda num_inference_steps: 0 < num_inference_steps < 500
     },
     'guidance_scale': {
@@ -61,8 +61,8 @@ INPUT_SCHEMA = {
     'scheduler': {
         'type': str,
         'required': False,
-        'default': 'K-LMS',
-        'constraints': lambda scheduler: scheduler in ['DDIM', 'DDPM', 'DPM-M', 'DPM-S',  'EULER-A', 'EULER-D', 'HEUN', 'IPNDM', 'KDPM2-A', 'KDPM2-D', 'PNDM', 'K-LMS', 'KLMS']
+        'default': 'EULER-A',
+        'constraints': lambda scheduler: scheduler in ['DDIM', 'DDPM', 'DPM-M', 'DPM-S', 'EULER-A', 'EULER-D', 'HEUN', 'IPNDM', 'KDPM2-A', 'KDPM2-D', 'PNDM', 'K-LMS', 'KLMS']
     },
     'seed': {
         'type': int,
@@ -72,7 +72,7 @@ INPUT_SCHEMA = {
     'nsfw': {
         'type': bool,
         'required': False,
-        'default': False
+        'default': True
     },
     'loras': {
         'type': list,
