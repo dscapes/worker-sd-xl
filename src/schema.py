@@ -74,20 +74,48 @@ INPUT_SCHEMA = {
         'type': list,
         'required': False,
         'default': None,
-        'item_schema': {
+        'schema': {
             'type': dict,
-            'required': True,
             'schema': {
-                'path': {
-                    'type': str,
-                    'required': True
-                },
-                'weight': {
-                    'type': float,
-                    'required': True,
-                    'constraints': lambda weight: 0 <= weight <= 1
-                }
+                'path': {'type': str, 'required': True},
+                'scale': {'type': float, 'required': False, 'default': 1.0}
             }
         }
+    },
+    'upscale': {
+        'type': dict,
+        'required': False,
+        'default': None,
+        'schema': {
+            'model_path': {'type': str, 'required': True},
+            'scale': {'type': float, 'required': False, 'default': 2.0},
+            'denoise_strength': {'type': float, 'required': False, 'default': 0.5},
+            'steps': {'type': int, 'required': False, 'default': 40},
+            'denoising_strength': {'type': float, 'required': False, 'default': 0.8,
+                                 'constraints': lambda x: 0.0 <= x <= 1.0},
+            'tile_size': {'type': int, 'required': False, 'default': 400},
+            'tile_padding': {'type': int, 'required': False, 'default': 10}
+        }
+    }
+}
+
+ADD_LORA_SCHEMA = {
+    'url': {
+        'type': str,
+        'required': True
+    }
+}
+
+ADD_ESRGAN_SCHEMA = {
+    'url': {
+        'type': str,
+        'required': True
+    }
+}
+
+ADD_EMBEDDING_SCHEMA = {
+    'url': {
+        'type': str,
+        'required': True
     }
 }

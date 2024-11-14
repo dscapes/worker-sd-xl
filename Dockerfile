@@ -3,6 +3,9 @@ FROM pytorch/pytorch:2.0.1-cuda11.7-cudnn8-runtime
 
 ENV DEBIAN_FRONTEND=noninteractive
 
+ARG MODEL_URL
+ENV MODEL_URL=${MODEL_URL}
+
 # Use bash shell with pipefail option
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
@@ -26,9 +29,9 @@ RUN python3 -m pip install --upgrade pip && \
     python3 -m pip install --upgrade -r /requirements.txt --no-cache-dir && \
     rm /requirements.txt
 
-# Fetch the model
+# Fetch the model using environment variable
 COPY builder/model_fetcher.py /model_fetcher.py
-RUN python /model_fetcher.py
+RUN python /model_fetcher.py --model_url ${MODEL_URL}
 RUN rm /model_fetcher.py
 
 # Add src files (Worker Template)

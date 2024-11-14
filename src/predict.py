@@ -6,6 +6,10 @@ from typing import List
 import torch
 from diffusers import DiffusionPipeline
 from huggingface_hub._login import _login
+from basicsr.archs.rrdbnet_arch import RRDBNet
+from realesrgan import RealESRGANer
+import numpy as np
+from PIL import Image
 
 # from PIL import Image
 MODEL_CACHE = "diffusers-cache"
@@ -47,33 +51,90 @@ class Predictor:
         )
         self.refiner.to("cuda")
 
+        # Инициализируем словарь для хранения апскейлеров
+        self.upsamplers = {}
+
+    def get_upsampler(self, model_path, scale=2, tile=400, tile_pad=10):
+        '''
+        Создает или возвращает существующий апскейлер для конкретной модели
+        '''
+        if model_path not in self.upsamplers:
+            model = RRDBNet(num_in_ch=3, num_out_ch=3, num_feat=64, num_block=23, num_grow_ch=32, scale=scale)
+            self.upsamplers[model_path] = RealESRGANer(
+                scale=scale,
+                model_path=f"/esrgan/{model_path}",
+                model=model,
+                tile=tile,
+                tile_pad=tile_pad,
+                pre_pad=0,
+                half=True
+            )
+        return self.upsamplers[model_path]
 
     @torch.inference_mode()
-    def predict(self, prompt, negative_prompt, width, height, seed):
+    def predict(self, prompt, negative_prompt, width, height, seed, 
+                steps=40, denoising_strength=0.8,
+                loras=None, upscale=None):
         '''
         Run a single prediction on the model
         '''
+        # Загружаем и применяем LoRA если они есть
+        if loras:
+            for lora in loras:
+                self.base.load_lora_weights(
+                    lora['path'],
+                    weight_name="pytorch_lora_weights.safetensors",
+                    adapter_name=lora['path']
+                )
+                self.base.set_adapters(
+                    [lora['path']], 
+                    adapter_weights=[lora['scale']]
+                )
 
-        # Define how many steps and what % of steps to be run on each experts (80/20) here
-        n_steps = 40
-        high_noise_frac = 0.8
-
-        # run both experts
+        # Генерация базового изображения
         image = self.base(
             prompt=prompt,
-            num_inference_steps=n_steps,
-            denoising_end=high_noise_frac,
+            negative_prompt=negative_prompt,
+            width=width,
+            height=height,
+            num_inference_steps=steps,
+            denoising_end=denoising_strength,
             output_type="latent",
         ).images
+
         output = self.refiner(
             prompt=prompt,
-            num_inference_steps=n_steps,
-            denoising_start=high_noise_frac,
+            negative_prompt=negative_prompt,
+            num_inference_steps=steps,
+            denoising_start=denoising_strength,
             image=image,
         )
 
+        # Отключаем LoRA если использовались
+        if loras:
+            self.base.disable_adapters()
+
         output_paths = []
         for i, sample in enumerate(output.images):
+            if upscale:
+                # Получаем апскейлер для конкретной модели
+                upsampler = self.get_upsampler(
+                    upscale['model_path'],
+                    scale=upscale.get('scale', 2.0),
+                    tile=upscale.get('tile_size', 400),
+                    tile_pad=upscale.get('tile_padding', 10)
+                )
+                
+                # Конвертируем PIL Image в numpy array
+                img_np = np.array(sample)
+                # Upscale изображения
+                upscaled, _ = upsampler.enhance(
+                    img_np, 
+                    outscale=upscale.get('scale', 2.0),
+                    denoise_strength=upscale.get('denoise_strength', 0.5)
+                )
+                # Конвертируем обратно в PIL
+                sample = Image.fromarray(upscaled)
 
             output_path = f"/tmp/out-{i}.png"
             sample.save(output_path)
