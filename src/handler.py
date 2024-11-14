@@ -4,6 +4,8 @@ import os
 import predict
 import argparse
 import base64
+import requests
+from urllib.parse import urlparse
 
 import runpod
 from runpod.serverless.utils.rp_validator import validate
@@ -16,13 +18,21 @@ def download_and_save(url, save_dir):
     '''
     Download a file from a URL and save it to the specified directory.
     '''
-    file_path = rp_download.download_file_from_url(url)
-    if file_path:
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        
         os.makedirs(save_dir, exist_ok=True)
-        save_path = os.path.join(save_dir, os.path.basename(file_path))
-        os.rename(file_path, save_path)
+        filename = os.path.basename(urlparse(url).path)
+        save_path = os.path.join(save_dir, filename)
+        
+        with open(save_path, 'wb') as f:
+            f.write(response.content)
+            
         return save_path
-    return None
+    except Exception as e:
+        print(f"Error downloading file: {str(e)}")
+        return None
 
 def get_models():
     '''
@@ -61,8 +71,10 @@ def run(job):
         validated_input = validate(job_input, ADD_ESRGAN_SCHEMA)
     elif job_method == "add_embedding":
         validated_input = validate(job_input, ADD_EMBEDDING_SCHEMA)
-    else: # get_models
-        validated_input = {}
+    elif job_method == "get_models":
+        return get_models()
+    else:
+        return {"error": "Invalid method"}
 
     if 'errors' in validated_input:
         return {"error": validated_input['errors']}
@@ -88,8 +100,6 @@ def run(job):
         return handle_add_esrgan(validated_input)
     elif job_method == "add_embedding":
         return handle_add_embedding(validated_input)
-    elif job_method == "get_models":
-        return get_models()
     else:
         return {"error": "Invalid method"}
 
@@ -111,7 +121,8 @@ def handle_txt2img(validated_input, job):
         width=validated_input.get('width', 512),
         height=validated_input.get('height', 512),
         seed=validated_input.get('seed', int.from_bytes(os.urandom(2), "big")),
-        loras=loras  # Добавляем параметр loras
+        loras=loras,
+        upscale=validated_input.get('upscale', None)
     )
 
     job_output = []
@@ -147,7 +158,8 @@ def handle_txt2img_raw(validated_input, job):
         width=validated_input.get('width', 512),
         height=validated_input.get('height', 512),
         seed=validated_input.get('seed', int.from_bytes(os.urandom(2), "big")),
-        loras=loras  # Добавляем параметр loras
+        loras=loras,
+        upscale=validated_input.get('upscale', None)
     )
 
     job_output = []

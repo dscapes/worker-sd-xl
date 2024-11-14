@@ -71,13 +71,41 @@ class Predictor:
             )
         return self.upsamplers[model_path]
 
+    def load_embeddings(self, embeddings):
+        '''
+        Загружает эмбединги в модель
+        "input": {
+            "prompt": "a photo of <cat-toy> in the garden",
+            "embeddings": [
+                {
+                    "path": "/embeddings/cat-toy.pt",
+                    "trigger_word": "cat-toy"
+                }
+            ]
+        }
+        '''
+        for embedding in embeddings:
+            self.base.load_textual_inversion(
+                embedding['path'],
+                token=embedding['trigger_word']
+            )
+            # Для рефайнера тоже загружаем
+            self.refiner.load_textual_inversion(
+                embedding['path'],
+                token=embedding['trigger_word']
+            )
+
     @torch.inference_mode()
     def predict(self, prompt, negative_prompt, width, height, seed, 
                 steps=40, denoising_strength=0.8,
-                loras=None, upscale=None):
+                loras=None, upscale=None, embeddings=None):
         '''
         Run a single prediction on the model
         '''
+        # Загружаем эмбединги если есть
+        if embeddings:
+            self.load_embeddings(embeddings)
+
         # Загружаем и применяем LoRA если они есть
         if loras:
             for lora in loras:
@@ -113,6 +141,11 @@ class Predictor:
         # Отключаем LoRA если использовались
         if loras:
             self.base.disable_adapters()
+
+        # Отключаем эмбединги после использования
+        if embeddings:
+            self.base.unload_textual_inversion()
+            self.refiner.unload_textual_inversion()
 
         output_paths = []
         for i, sample in enumerate(output.images):
