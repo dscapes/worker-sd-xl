@@ -44,12 +44,12 @@ class Predictor:
             if not torch.cuda.is_available():
                 raise RuntimeError("CUDA is not available")
                 
-            # Очистим кэш CUDA перед загрузкой модели
             torch.cuda.empty_cache()
             
-            # Используем скачанную модель из /diffusers-cache
-            model_path = next(Path("/diffusers-cache").glob("*"))  # получаем путь к файлу модели
-            print(f"Loading model from: {model_path}")  # для отладки
+            model_path = next(Path("/diffusers-cache").glob("*"))
+            model_path = Path(str(model_path).replace('"', '').replace("'", ''))
+            
+            print(f"Loading model from: {model_path}")
             
             self.base = StableDiffusionXLPipeline.from_single_file(
                 model_path,

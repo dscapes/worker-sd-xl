@@ -35,34 +35,21 @@ def download_model(model_url: str = "https://huggingface.co/stabilityai/stable-d
         shutil.rmtree(model_cache_path)
     model_cache_path.mkdir(parents=True, exist_ok=True)
 
-    # Check if the URL is from huggingface.co, if so, grab the model repo id.
-    parsed_url = urlparse(model_url)
-    if parsed_url.netloc == "huggingface.co":
-        model_id = f"{parsed_url.path.strip('/')}"
-        
-        StableDiffusionSafetyChecker.from_pretrained(
-            SAFETY_MODEL_ID,
-            cache_dir=model_cache_path,
-        )
-
-        StableDiffusionPipeline.from_pretrained(
-            model_id,
-            cache_dir=model_cache_path,
-            use_auth_token=args.hf_token
-        )
+    downloaded_model = requests.get(model_url, stream=True, timeout=600)
+    
+    # Получаем имя файла из URL или заголовков
+    if 'content-disposition' in downloaded_model.headers:
+        filename = re.findall("filename=(.+)", downloaded_model.headers['content-disposition'])[0]
     else:
-        # Получаем имя файла из заголовков ответа или из URL
-        response = requests.get(model_url, stream=True, timeout=600)
-        if 'content-disposition' in response.headers:
-            filename = re.findall("filename=(.+)", response.headers['content-disposition'])[0]
-        else:
-            filename = model_url.split('/')[-1]
-
-        # Сохраняем модель с оригинальным именем
-        with open(model_cache_path / filename, "wb") as f:
-            for chunk in response.iter_content(chunk_size=1024):
-                if chunk:
-                    f.write(chunk)
+        filename = model_url.split('/')[-1]
+        
+    # Очищаем имя файла от кавычек
+    filename = filename.replace('"', '').replace("'", '')
+    
+    with open(model_cache_path / filename, "wb") as f:
+        for chunk in downloaded_model.iter_content(chunk_size=1024):
+            if chunk:
+                f.write(chunk)
 
 # ---------------------------------------------------------------------------- #
 #                                Parse Arguments                               #
