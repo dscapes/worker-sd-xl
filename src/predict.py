@@ -5,7 +5,11 @@ from typing import List
 from pathlib import Path
 
 import torch
-from diffusers import StableDiffusionXLPipeline, StableDiffusionXLRefinerPipeline
+from diffusers import (
+    StableDiffusionXLPipeline,
+    StableDiffusionXLImg2ImgPipeline,  # для будущего использования
+)
+from diffusers.pipelines.stable_diffusion_xl import StableDiffusionXLRefinerPipeline
 from huggingface_hub._login import _login
 from basicsr.archs.rrdbnet_arch import RRDBNet
 from realesrgan import RealESRGANer
@@ -159,7 +163,8 @@ class Predictor:
                     upscale['model_path'],
                     scale=upscale.get('scale', 2.0),
                     tile=upscale.get('tile_size', 400),
-                    tile_pad=upscale.get('tile_padding', 10)
+                    tile_pad=upscale.get('tile_padding', 10),
+                    steps=upscale.get('steps', 20)
                 )
                 
                 # Конвертируем PIL Image в numpy array

@@ -16,13 +16,13 @@ INPUT_SCHEMA = {
         'type': int,
         'required': False,
         'default': 512,
-        'constraints': lambda width: width in [128, 256, 384, 448, 512, 576, 640, 704, 720, 768, 832, 896, 960, 1024, 1080, 1088, 1152, 1216, 1280, 1344, 1408, 1472, 1536, 1600, 1664, 1728, 1792, 1856, 1920, 1984, 2048]
+        'constraints': lambda width: 0 < width <= 2048
     },
     'height': {
         'type': int,
         'required': False,
         'default': 512,
-        'constraints': lambda height: height in [128, 256, 384, 448, 512, 576, 640, 704, 720, 768, 832, 896, 960, 1024, 1080, 1088, 1152, 1216, 1280, 1344, 1408, 1472, 1536, 1600, 1664, 1728, 1792, 1856, 1920, 1984, 2048]
+        'constraints': lambda width: 0 < width <= 2048
     },
     'init_image': {
         'type': str,
@@ -94,7 +94,7 @@ INPUT_SCHEMA = {
             'model_path': {'type': str, 'required': True},
             'scale': {'type': float, 'required': False, 'default': 2.0},
             'denoise_strength': {'type': float, 'required': False, 'default': 0.5},
-            'steps': {'type': int, 'required': False, 'default': 40},
+            'steps': {'type': int, 'required': False, 'default': 20},
             'denoising_strength': {'type': float, 'required': False, 'default': 0.8,
                                  'constraints': lambda x: 0.0 <= x <= 1.0},
             'tile_size': {'type': int, 'required': False, 'default': 400},
