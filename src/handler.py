@@ -149,7 +149,7 @@ def handle_txt2img(validated_input, job):
         width=validated_input.get("width", 512),
         height=validated_input.get("height", 512),
         seed=seed,
-        num_inference_steps=validated_input.get("num_inference_steps", 20),
+        num_inference_steps=validated_input.get("num_inference_steps", 50),
         guidance_scale=validated_input.get("guidance_scale", 7.5),
         num_images_per_prompt=validated_input.get("num_outputs", 1),
         scheduler=validated_input.get("scheduler", "EULER-A"),

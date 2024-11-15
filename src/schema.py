@@ -49,7 +49,7 @@ INPUT_SCHEMA = {
     'num_inference_steps': {
         'type': int,
         'required': False,
-        'default': 20,
+        'default': 50,
         'constraints': lambda num_inference_steps: 0 < num_inference_steps < 500
     },
     'guidance_scale': {

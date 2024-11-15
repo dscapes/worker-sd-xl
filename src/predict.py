@@ -5,15 +5,14 @@ from typing import List
 from pathlib import Path
 
 import torch
-from diffusers import StableDiffusionXLPipeline
+from diffusers import StableDiffusionXLPipeline, StableDiffusionXLRefinerPipeline
 from huggingface_hub._login import _login
 from basicsr.archs.rrdbnet_arch import RRDBNet
 from realesrgan import RealESRGANer
 import numpy as np
 from PIL import Image
 
-# from PIL import Image
-MODEL_CACHE = "diffusers-cache"
+MODEL_CACHE = "diffusers-cache" # todo remove?
 
 token = os.environ.get("HUGGINGFACE_TOKEN", None)
 if token is None:
@@ -33,7 +32,7 @@ class Predictor:
         self.device = "cuda"
         self.hf_token = hf_token
         self.base = None
-        #self.refiner = None
+        self.refiner = None
         self.NSFW = True
 
     def setup(self):
@@ -59,15 +58,15 @@ class Predictor:
             )
             self.base.to(self.device)
             
-            # self.refiner = DiffusionPipeline.from_pretrained(
-            #     "stabilityai/stable-diffusion-xl-refiner-1.0",
-            #     text_encoder_2=self.base.text_encoder_2,
-            #     vae=self.base.vae,
-            #     torch_dtype=torch.float16,
-            #     use_safetensors=True,
-            #     variant="fp16",
-            # )
-            # self.refiner.to(self.device)
+            self.refiner = StableDiffusionXLRefinerPipeline.from_pretrained(
+                "stabilityai/stable-diffusion-xl-refiner-1.0",
+                text_encoder_2=self.base.text_encoder_2,
+                vae=self.base.vae,
+                torch_dtype=torch.float16,
+                use_safetensors=True,
+                variant="fp16",
+            )
+            self.refiner.to(self.device)
 
             # Инициализируем словарь для хранения апскейлеров
             self.upsamplers = {}
@@ -95,30 +94,21 @@ class Predictor:
     def load_embeddings(self, embeddings):
         '''
         Load embeddings into the model
-        "input": {
-            "prompt": "a photo of <cat-toy> in the garden",
-            "embeddings": [
-                {
-                    "path": "cat-toy.pt",
-                    "trigger_word": "cat-toy"
-                }
-            ]
-        }
         '''
         for embedding in embeddings:
             self.base.load_textual_inversion(
                 embedding['path'],
                 token=embedding['trigger_word']
             )
-            # # Для рефайнера тоже загружаем
-            # self.refiner.load_textual_inversion(
-            #     embedding['path'],
-            #     token=embedding['trigger_word']
-            # )
+            # Для рефайнера тоже загружаем
+            self.refiner.load_textual_inversion(
+                embedding['path'],
+                token=embedding['trigger_word']
+            )
 
     @torch.inference_mode()
     def predict(self, prompt, negative_prompt, width, height, seed, 
-                num_inference_steps=20, guidance_scale=7.5,
+                num_inference_steps=50, guidance_scale=7.5,
                 num_images_per_prompt=1, scheduler='EULER-A',
                 loras=None, upscale=None, embeddings=None):
         """
@@ -143,59 +133,23 @@ class Predictor:
             output_type="latent",
         ).images
 
-        """
-        # Для будущей реализации img2img:
-        def img2img(self, prompt, init_image, mask=None, 
-                   negative_prompt=None, prompt_strength=0.8,
-                   num_inference_steps=50, guidance_scale=7.5,
-                   width=512, height=512):
-            
-            if init_image is not None:
-                if mask is not None:
-                    # Inpainting
-                    image = self.base(
-                        prompt=prompt,
-                        image=init_image,
-                        mask_image=mask,
-                        negative_prompt=negative_prompt,
-                        strength=prompt_strength,
-                        num_inference_steps=num_inference_steps,
-                        guidance_scale=guidance_scale,
-                        width=width,
-                        height=height,
-                    ).images
-                else:
-                    # img2img
-                    image = self.base(
-                        prompt=prompt,
-                        image=init_image,
-                        negative_prompt=negative_prompt,
-                        strength=prompt_strength,
-                        num_inference_steps=num_inference_steps,
-                        guidance_scale=guidance_scale,
-                        width=width,
-                        height=height,
-                    ).images
-        """
-
-        # tempory
-        output = image
-        # output = self.refiner(
-        #     prompt=prompt,
-        #     negative_prompt=negative_prompt,
-        #     num_inference_steps=num_inference_steps,
-        #     denoising_start=0.8,
-        #     image=image,
-        # )
+        output = self.refiner(
+            prompt=prompt,
+            negative_prompt=negative_prompt,
+            num_inference_steps=num_inference_steps,
+            denoising_start=0.8,
+            image=image,
+        )
 
         # Отключаем LoRA если использовались
         if loras:
             self.base.disable_adapters()
+            self.refiner.disable_adapters()
 
         # Отключаем эмбединги после использования
         if embeddings:
             self.base.unload_textual_inversion()
-            # self.refiner.unload_textual_inversion()
+            self.refiner.unload_textual_inversion()
 
         output_paths = []
         for i, sample in enumerate(output.images):

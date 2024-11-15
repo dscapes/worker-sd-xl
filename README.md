@@ -94,8 +94,7 @@ Recommended SDXL image resolutions (before upscale):
         "negative_prompt": "bad quality",
         "width": 1024,
         "height": 1024,
-        "steps": 20,
-        "denoising_strength": 0.8,
+        "num_inference_steps": 50,
         "upscale": {
             "model_path": "4x_foolhardy_Remacri.pth",
             "scale": 2.0,
