@@ -35,7 +35,10 @@ RUN python3 -m pip install --upgrade pip && \
     python3 -m pip install --upgrade -r /requirements.txt --no-cache-dir && \
     rm /requirements.txt
 
-# Fetch the model using environment variable
+# Create directories for models
+RUN mkdir -p /diffusers-cache /esrgan
+
+# Fetch the models
 COPY builder/model_fetcher.py /model_fetcher.py
 RUN python /model_fetcher.py --model_url ${MODEL_URL} --civitai_token ${CIVITAI_TOKEN} --hf_token=${HF_TOKEN}
 RUN rm /model_fetcher.py

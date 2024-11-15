@@ -24,6 +24,24 @@ if token is None:
 
 SAFETY_MODEL_ID = "CompVis/stable-diffusion-safety-checker"
 MODEL_CACHE_DIR = "diffusers-cache"
+ESRGAN_CACHE_DIR = "esrgan"
+ESRGAN_URL = "https://civitai.com/api/download/models/164821"
+
+def download_esrgan(url: str = ESRGAN_URL, filename: str = "4x_foolhardy_Remacri.pth"):
+    '''
+    Downloads the ESRGAN upscaler model
+    '''
+    esrgan_path = Path(ESRGAN_CACHE_DIR)
+    if not esrgan_path.exists():
+        esrgan_path.mkdir(parents=True, exist_ok=True)
+
+    downloaded_model = requests.get(url, stream=True, timeout=600)
+    
+    with open(esrgan_path / filename, "wb") as f:
+        for chunk in downloaded_model.iter_content(chunk_size=1024):
+            if chunk:
+                f.write(chunk)
+    print(f"ESRGAN model downloaded to {esrgan_path / filename}")
 
 def download_model(model_url: str = "https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0"):
     '''
@@ -66,3 +84,4 @@ parser.add_argument('--hf_token', type=str, help='HuggingFace token')
 if __name__ == "__main__":
     args = parser.parse_args()
     download_model(args.model_url)
+    download_esrgan()
