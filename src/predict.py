@@ -5,11 +5,8 @@ from typing import List
 from pathlib import Path
 
 import torch
-from diffusers import (
-    StableDiffusionXLPipeline,
-    StableDiffusionXLImg2ImgPipeline,  # для будущего использования
-)
-from diffusers.pipelines.stable_diffusion_xl import StableDiffusionXLRefinerPipeline
+from diffusers import StableDiffusionXLPipeline
+#DiffusionPipeline, StableDiffusionXLPipeline #,StableDiffusionXLImg2ImgPipeline,  # для будущего использования
 from huggingface_hub._login import _login
 from basicsr.archs.rrdbnet_arch import RRDBNet
 from realesrgan import RealESRGANer
@@ -62,7 +59,7 @@ class Predictor:
             )
             self.base.to(self.device)
             
-            self.refiner = StableDiffusionXLRefinerPipeline.from_pretrained(
+            self.refiner = StableDiffusionXLPipeline.from_pretrained(
                 "stabilityai/stable-diffusion-xl-refiner-1.0",
                 text_encoder_2=self.base.text_encoder_2,
                 vae=self.base.vae,
@@ -123,7 +120,21 @@ class Predictor:
             generator = torch.Generator(device=self.device).manual_seed(seed)
         else:
             generator = None
-            
+        
+        # Загружаем и применяем LoRA если они есть
+        # if loras:
+        #     for lora in loras:
+        #         self.base.load_lora_weights(
+        #             lora['path'],
+        #             weight_name="pytorch_lora_weights.safetensors",
+        #             adapter_name=lora['path']
+        #         )
+        #         self.base.set_adapters(
+        #             [lora['path']], 
+        #             adapter_weights=[lora['scale']]
+        #         )
+        # !!! и эмбединги load_embeddings() !!! не забыть про пути
+
         # Генерация базового изображения
         image = self.base(
             prompt=prompt,
