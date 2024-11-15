@@ -6,7 +6,7 @@ Can upscale images with RealESRGAN.\
 Downloads Embeddings / LoRAs / ESRGAN models by API.\
 Returns a list of Embeddings / LoRAs / ESRGAN models by API.
 
-Default model can be changed by `MODEL_URL` GitHub variable.
+Default model can be changed by `MODEL_URL` GitHub variable. (Obsolete)
 
 # Common info
 
@@ -124,11 +124,19 @@ Recommended SDXL image resolutions (before upscale):
 }
 ```
 
+# Download Models if they don't exist in Network Storage
+
+## RunPod Variables
+`CHECKPOINT_URL`
+`CHECKPOINT_FILENAME`
+`UPSCALER_URL`
+`UPSCALER_FILENAME`
+
 ## GitHub Variables
-`IMAGE_NAME`
-`MODEL_URL`
+`IMAGE_NAME` (Obsolete)
+`MODEL_URL` (Obsolete)
 
 ## GitHub Secrets
-`CIVITAI_TOKEN`
+`CIVITAI_TOKEN` (Obsolete)
 `DOCKER_HUB_ACCESS_TOKEN`
 `DOCKER_HUB_USERNAME`

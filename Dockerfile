@@ -41,11 +41,6 @@ RUN mkdir -p /workspace/models/diffusers-cache \
     /workspace/models/lora \
     /workspace/models/embeddings
 
-# Fetch the models
-COPY builder/model_fetcher.py /model_fetcher.py
-RUN python /model_fetcher.py --model_url ${MODEL_URL} --civitai_token ${CIVITAI_TOKEN} --hf_token=${HF_TOKEN}
-RUN rm /model_fetcher.py
-
 # Add src files (Worker Template)
 ADD src .
 

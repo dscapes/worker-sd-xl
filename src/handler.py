@@ -29,12 +29,10 @@ def download_and_save(url, save_dir):
         response = requests.get(download_url)
         response.raise_for_status()
         
-        # Получаем Content-Disposition header для имени файла
         content_disposition = response.headers.get('Content-Disposition')
         if content_disposition and 'filename=' in content_disposition:
             filename = content_disposition.split('filename=')[1].strip('"\'')
         else:
-            # Если нет Content-Disposition, используем ID из URL и правильное расширение
             path_parts = parsed_url.path.rstrip('/').split('/')
             model_id = path_parts[-1]
             
@@ -108,8 +106,7 @@ def run(job):
     # Download input objects
     validated_input['init_image'], validated_input['mask'] = rp_download.download_files_from_urls(
         job['id'],
-        [validated_input.get('init_image', None), validated_input.get(
-            'mask', None)]
+        [validated_input.get('init_image', None), validated_input.get('mask', None)]
     )  # pylint: disable=unbalanced-tuple-unpacking
 
     MODEL.NSFW = validated_input.get('nsfw', True)
@@ -134,22 +131,20 @@ def handle_txt2img(validated_input, job):
     '''
     loras = validated_input.get("loras", None)
     if loras is not None:
-        # Преобразуем пути для каждой LoRA
         for lora in loras:
             lora['path'] = f"/workspace/models/lora/{lora['path']}"
             if 'scale' not in lora:
-                lora['scale'] = 1.0  # значение по умолчанию
+                lora['scale'] = 1.0
 
     embeddings = validated_input.get("embeddings", None)
     if embeddings is not None:
         for embedding in embeddings:
             embedding['path'] = f"/workspace/models/embeddings/{embedding['path']}"
 
-    # Получаем seed, если он не указан, генерируем случайный
     seed = validated_input.get('seed', int.from_bytes(os.urandom(2), "big"))
 
     img_paths = MODEL.predict(
-        prompt=validated_input["prompt"],  # только prompt обязательный
+        prompt=validated_input["prompt"],
         negative_prompt=validated_input.get("negative_prompt"),
         width=validated_input.get("width", 512),
         height=validated_input.get("height", 512),
@@ -184,18 +179,16 @@ def handle_txt2img_raw(validated_input, job):
     '''
     loras = validated_input.get("loras", None)
     if loras is not None:
-        # Преобразуем пути для каждой LoRA
         for lora in loras:
             lora['path'] = f"/workspace/models/lora/{lora['path']}"
             if 'scale' not in lora:
-                lora['scale'] = 1.0  # значение по умолчанию
+                lora['scale'] = 1.0 
 
     embeddings = validated_input.get("embeddings", None)
     if embeddings is not None:
         for embedding in embeddings:
             embedding['path'] = f"/workspace/models/embeddings/{embedding['path']}"
 
-    # Получаем seed, если он не указан, генерируем случайный
     seed = validated_input.get('seed', int.from_bytes(os.urandom(2), "big"))
 
     img_paths = MODEL.predict(
@@ -210,7 +203,6 @@ def handle_txt2img_raw(validated_input, job):
 
     job_output = []
     for index, img_path in enumerate(img_paths):
-        # Читаем изображение в base64
         with open(img_path, "rb") as image_file:
             encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
 
@@ -265,6 +257,10 @@ parser.add_argument('--hf_token', type=str, help='HuggingFace token')
 
 if __name__ == "__main__":
     args = parser.parse_args()
+
+    # Проверяем и скачиваем модели если нужно
+    from model_fetcher import download_if_needed
+    download_if_needed()
 
     MODEL = predict.Predictor(model_tag=args.model_tag, hf_token=args.hf_token)
     MODEL.setup()
