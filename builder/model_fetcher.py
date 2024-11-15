@@ -23,8 +23,8 @@ if token is None:
     print('token is None in model_fetcher')
 
 SAFETY_MODEL_ID = "CompVis/stable-diffusion-safety-checker"
-MODEL_CACHE_DIR = "diffusers-cache"
-ESRGAN_CACHE_DIR = "esrgan"
+MODEL_CACHE_DIR = "/workspace/models/diffusers-cache"
+ESRGAN_CACHE_DIR = "/workspace/models/esrgan"
 ESRGAN_URL = "https://civitai.com/api/download/models/164821"
 
 def download_esrgan(url: str = ESRGAN_URL, filename: str = "4x_foolhardy_Remacri.pth"):

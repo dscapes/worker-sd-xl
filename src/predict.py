@@ -46,7 +46,7 @@ class Predictor:
                 
             torch.cuda.empty_cache()
             
-            model_path = next(Path("/diffusers-cache").glob("*"))
+            model_path = next(Path("/workspace/models/diffusers-cache").glob("*"))
             model_path = Path(str(model_path).replace('"', '').replace("'", ''))
             
             print(f"Loading model from: {model_path}")
@@ -83,7 +83,7 @@ class Predictor:
             model = RRDBNet(num_in_ch=3, num_out_ch=3, num_feat=64, num_block=23, num_grow_ch=32, scale=scale)
             self.upsamplers[model_path] = RealESRGANer(
                 scale=scale,
-                model_path=f"/esrgan/{model_path}",
+                model_path=f"/workspace/models/esrgan/{model_path}",
                 model=model,
                 tile=tile,
                 tile_pad=tile_pad,
@@ -178,6 +178,8 @@ class Predictor:
                     ).images
         """
 
+        # tempory
+        output = image
         # output = self.refiner(
         #     prompt=prompt,
         #     negative_prompt=negative_prompt,

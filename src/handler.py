@@ -61,10 +61,10 @@ def get_models():
     '''
     Get a list of all LoRA, ESRGAN, and embedding models on the server.
     '''
-    base_models = os.listdir('/diffusers-cache') if os.path.exists('/diffusers-cache') else []
-    lora_models = os.listdir('/loras') if os.path.exists('/loras') else []
-    esrgan_models = os.listdir('/esrgan') if os.path.exists('/esrgan') else []
-    embedding_models = os.listdir('/embeddings') if os.path.exists('/embeddings') else []
+    base_models = os.listdir('/workspace/models/diffusers-cache') if os.path.exists('/workspace/models/diffusers-cache') else []
+    lora_models = os.listdir('/workspace/models/lora') if os.path.exists('/workspace/models/lora') else []
+    esrgan_models = os.listdir('/workspace/models/esrgan') if os.path.exists('/workspace/models/esrgan') else []
+    embedding_models = os.listdir('/workspace/models/embeddings') if os.path.exists('/workspace/models/embeddings') else []
 
     return {
         "checkpoints": base_models,
@@ -136,14 +136,14 @@ def handle_txt2img(validated_input, job):
     if loras is not None:
         # Преобразуем пути для каждой LoRA
         for lora in loras:
-            lora['path'] = f"/loras/{lora['path']}"
+            lora['path'] = f"/workspace/models/lora/{lora['path']}"
             if 'scale' not in lora:
                 lora['scale'] = 1.0  # значение по умолчанию
 
     embeddings = validated_input.get("embeddings", None)
     if embeddings is not None:
         for embedding in embeddings:
-            embedding['path'] = f"/embeddings/{embedding['path']}"
+            embedding['path'] = f"/workspace/models/embeddings/{embedding['path']}"
 
     # Получаем seed, если он не указан, генерируем случайный
     seed = validated_input.get('seed', int.from_bytes(os.urandom(2), "big"))
@@ -186,14 +186,14 @@ def handle_txt2img_raw(validated_input, job):
     if loras is not None:
         # Преобразуем пути для каждой LoRA
         for lora in loras:
-            lora['path'] = f"/loras/{lora['path']}"
+            lora['path'] = f"/workspace/models/lora/{lora['path']}"
             if 'scale' not in lora:
                 lora['scale'] = 1.0  # значение по умолчанию
 
     embeddings = validated_input.get("embeddings", None)
     if embeddings is not None:
         for embedding in embeddings:
-            embedding['path'] = f"/embeddings/{embedding['path']}"
+            embedding['path'] = f"/workspace/models/embeddings/{embedding['path']}"
 
     # Получаем seed, если он не указан, генерируем случайный
     seed = validated_input.get('seed', int.from_bytes(os.urandom(2), "big"))

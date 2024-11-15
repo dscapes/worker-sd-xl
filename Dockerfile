@@ -36,7 +36,10 @@ RUN python3 -m pip install --upgrade pip && \
     rm /requirements.txt
 
 # Create directories for models
-RUN mkdir -p /diffusers-cache /esrgan
+RUN mkdir -p /workspace/models/diffusers-cache \
+    /workspace/models/esrgan \
+    /workspace/models/lora \
+    /workspace/models/embeddings
 
 # Fetch the models
 COPY builder/model_fetcher.py /model_fetcher.py
